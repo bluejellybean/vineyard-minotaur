@@ -32,6 +32,13 @@
     }
   },
   "Contract": {
+    "table": {
+      "indexes": [
+        {
+          "properties": ["address", "transaction"]
+        }
+      ]
+    },
     "properties": {
       "id": {
         "type": "long"
@@ -69,6 +76,13 @@
     }
   },
   "Transaction": {
+    "table": {
+      "indexes": [
+        {
+          "properties": ["from", "to"]
+        }
+      ]
+    },
     "properties": {
       "id": {
         "type": "long"
@@ -109,6 +123,13 @@
     }
   },
   "Token": {
+    "table": {
+      "indexes": [
+        {
+          "properties": ["transaction"]
+        }
+      ]
+    },
     "properties": {
       "id": {
         "type": "long",
@@ -136,6 +157,13 @@
     }
   },
   "TokenTransfer": {
+    "table": {
+      "indexes": [
+        {
+          "properties": ["from", "to"]
+        }
+      ]
+    },
     "properties": {
       "id": {
         "type": "long"
