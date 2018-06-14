@@ -34,34 +34,34 @@
       },
       "coinbase": {
         "type": "char",
-        "length": 42
+        "length": 43
       },
       "difficulty": {
         "type": "char",
-        "length": 8
+        "length": 9
       },
       "extraData": {
         "type": "string"
       },
       "gasLimit": {
         "type": "char",
-        "length": 8
+        "length": 9
       },
       "parentHash": {
         "type": "char",
-        "length": 66
+        "length": 67
       },
       "receiptTrie": {
         "type": "char",
-        "length": 66
+        "length": 67
       },
       "stateRoot": {
         "type": "char",
-        "length": 66
+        "length": 67
       },
       "transactionsTrie": {
         "type": "char",
-        "length": 66
+        "length": 67
       },
       "rlp": {
         "type": "string"
