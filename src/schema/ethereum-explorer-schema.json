@@ -26,6 +26,9 @@
         "length": 66,
         "unique": true
       },
+      "number": {
+        "type": "int"
+      },
       "timeMined": {
         "type": "datetime"
       },
