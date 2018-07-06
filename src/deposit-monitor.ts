@@ -103,21 +103,23 @@ export class DepositMonitor {
     if (!blockInfo)
       return undefined
 
-    const fullBlock = await this.client.getFullBlock(blockInfo.index)
-    if (!fullBlock) {
+    const BlockBundle = await this.client.getBlockBundle(blockInfo.index)
+
+    if (!BlockBundle) {
       console.error('Invalid block', blockInfo)
       return undefined
     }
+
     const block = {
-      blockIndex: fullBlock.index,
+      blockIndex: BlockBundle.blocks.index,
       currency: this.currency.id
     }
 
-    if (!fullBlock.transactions) {
+    if (!BlockBundle.transactions) {
       return block
     }
 
-    await this.saveExternalTransactions(fullBlock.transactions, block.blockIndex)
+    await this.saveExternalTransactions(BlockBundle.transactions, block.blockIndex)
     return this.model.setLastBlock(block)
   }
 

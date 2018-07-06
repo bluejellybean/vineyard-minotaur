@@ -12,7 +12,8 @@ const monitor_logic_1 = require("./monitor-logic");
 const utility_1 = require("./utility");
 const index_1 = require("./utility/index");
 const database_functions_1 = require("./database-functions");
-function gatherAddresses(blocks) {
+function gatherAddresses(blockBundle) {
+    const blocks = blockBundle.block;
     const addresses = {};
     for (let block of blocks) {
         for (let transaction of block.transactions) {
@@ -24,17 +25,18 @@ function gatherAddresses(blocks) {
     }
     return addresses;
 }
-function saveFullBlocks(dao, blocks) {
+function saveFullBlocks(dao, BlockBundle) {
     return __awaiter(this, void 0, void 0, function* () {
+        const blocks = BlockBundle.blocks;
         const ground = dao.ground;
-        const transactions = index_1.flatMap(blocks, b => b.transactions);
+        const transactions = index_1.flatMap(BlockBundle.transactions, b => b.transactions);
         const addresses = gatherAddresses(blocks);
         const lastBlockIndex = blocks.sort((a, b) => b.index - a.index)[0].index;
         yield Promise.all([
             database_functions_1.saveBlocks(ground, blocks),
             dao.lastBlockDao.setLastBlock(lastBlockIndex),
-            database_functions_1.getOrCreateAddresses(dao.ground, addresses)
-                .then(() => database_functions_1.saveSingleTransactions(ground, transactions, addresses))
+            database_functions_1.getOrCreateAddresses(dao.ground, add
+                .then(() => database_functions_1.saveSingleTransactions(ground, transactions, addresses)))
         ]);
         console.log('Saved blocks; count', blocks.length, 'last', lastBlockIndex);
     });
@@ -42,7 +44,7 @@ function saveFullBlocks(dao, blocks) {
 function scanMiniBlocks(dao, client, config, profiler = new utility_1.EmptyProfiler()) {
     return __awaiter(this, void 0, void 0, function* () {
         const blockQueue = yield monitor_logic_1.createBlockQueue(dao.lastBlockDao, client, config.queue, config.minConfirmations, -1); // TODO: Set this to something that works
-        const saver = (blocks) => saveFullBlocks(dao, blocks);
+        const saver = (BlockBundle) => saveFullBlocks(dao, BlockBundle.block);
         return monitor_logic_1.scanBlocks(blockQueue, saver, dao.ground, dao.lastBlockDao, config, profiler);
     });
 }

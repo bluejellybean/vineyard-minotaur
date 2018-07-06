@@ -56,7 +56,6 @@ export class ExternalBlockQueue<Block extends IndexedBlock> {
 
   private onResponse(blockIndex: number, block: Block | undefined) {
     this.removeRequest(blockIndex)
-
     if (!block) {
       if (this.listeners.length > 0) {
         const listeners = this.listeners
@@ -70,7 +69,7 @@ export class ExternalBlockQueue<Block extends IndexedBlock> {
       this.blocks.push(block)
       const listeners = this.listeners
       if (this.listeners.length > 0) {
-        const readyBlocks = this.getConsecutiveBlocks()
+        const readyBlocks = this.getConsecutiveBlocks() // WHY is this empty...
         if (readyBlocks.length > 0) {
           this.listeners = []
           this.removeBlocks(readyBlocks)
@@ -86,10 +85,14 @@ export class ExternalBlockQueue<Block extends IndexedBlock> {
   }
 
   private addRequest(index: number) {
-    // console.log('add block', index)
     const tryRequest: SimpleFunction = async () => {
       try {
-        const block = await this.client.getFullBlock(index)
+        console.log('this.client1', this.client.getBlockBundle)
+        const block = await this.client.getBlockBundle(index)
+        console.log('block...?', block)
+        // TODO: figure out why this is so screwy. getFullBlock _DOES_ produce a block
+        // I have check the node modules, these _do_ appear to be pulling from the correct location..
+        // not sure where the heck getFullBlock is coming from.
         await this.onResponse(index, block)
       }
       catch(error) {
@@ -98,7 +101,6 @@ export class ExternalBlockQueue<Block extends IndexedBlock> {
         // this.onResponse(index, undefined)
       }
     }
-
     const promise = tryRequest()
     this.requests.push({
       blockIndex: index,
@@ -110,7 +112,6 @@ export class ExternalBlockQueue<Block extends IndexedBlock> {
     if (this.highestBlockIndex === undefined) {
       this.highestBlockIndex = await this.client.getHeighestBlockIndex()
     }
-
     const remaining = this.highestBlockIndex - this.blockIndex
     let count = Math.min(
       remaining,
@@ -126,12 +127,12 @@ export class ExternalBlockQueue<Block extends IndexedBlock> {
 
   // Ensures that batches of blocks are returned in consecutive order
   private getConsecutiveBlocks(): Block[] {
-    if (this.blocks.length == 0)
+    if (this.blocks.length == 0) {
       return []
-
+    }
     const results = this.blocks.concat([]).sort((a, b) => a.index > b.index ? 1 : -1)
     const oldestRequest = this.requests.map(r => r.blockIndex).sort()[0]
-    const oldestResult = results[0].index
+    const oldestResult = results[0].blocks.index
     if (oldestRequest && oldestResult > oldestRequest) {
       return []
     }
@@ -139,12 +140,11 @@ export class ExternalBlockQueue<Block extends IndexedBlock> {
     const blocks: Block[] = []
     let i = oldestResult
     for (let r of results) {
-      if (r.index != i++)
+      if (r.index != i++) {
         break
-
+      }
       blocks.push(r)
     }
-
     if (blocks.length < this.config.minSize && this.requests.length > 0) {
       return []
     }

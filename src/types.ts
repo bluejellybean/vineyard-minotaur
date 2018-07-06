@@ -125,8 +125,13 @@ export interface ExternalBlock {
   timeMined: Date
 }
 
-export interface FullBlock<ExternalTransaction> extends ExternalBlock {
-  transactions: ExternalTransaction[]
+// export interface FullBlock<ExternalTransaction> extends ExternalBlock {
+//   transactions: ExternalTransaction[]
+// }
+
+export interface BlockBundle<block extends ExternalBlock, Transaction extends ExternalTransaction> {
+  blocks: block []
+  transactions: Transaction []
 }
 
 export interface NewTransaction {

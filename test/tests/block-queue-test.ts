@@ -69,8 +69,8 @@ describe('queue test', function () {
 
     const underTest = new ExternalBlockQueue(
       getMockBlockReader(highestBlock),
-      0,
-      {
+      0, // INDEX
+      { // ACTS AS THE CONFIG!
         maxSize: numberToProcessPerGetBlocksCall,
         minSize: getBlocksResponseSize
       }
@@ -223,9 +223,9 @@ describe('queue test', function () {
     const highestBlock = 10
     const getBlocksResponseSize = 5
     const numberToProcessPerGetBlocksCall = 8
-
+    console.log('TEST 7 NEVER', never)
     const underTest = new ExternalBlockQueue(
-      getMockBlockReader(highestBlock, never,(index) => index == 7),
+      getMockBlockReader(highestBlock, never, (index) => index == 7),
       0,
       {
         maxSize: numberToProcessPerGetBlocksCall,
@@ -243,7 +243,7 @@ describe('queue test', function () {
   })
 })
 
-export type MockBlock = { index: number }
+export type MockBlockBundle = { block: {index: number }}
 export const never = (index: number) => false
 
 export function getMockBlockReader(
@@ -251,16 +251,18 @@ export function getMockBlockReader(
   undefinedCondition: (index: number) => boolean = never,
   errorCondition: (index: number) => boolean = never)
 : BlockReader<MockBlock> {
+  console.log('----- mo2ckBlockReader-------', highestBlock, undefinedCondition, errorCondition )
   return {
     getHeighestBlockIndex: async () => {
       return highestBlock
     },
 
-    getFullBlock: async (index: number) => {
+    getBlockBundle: async (index: number) => {
+      console.log('getBlockBUndle..........errco2nd.....', errorCondition, index)
       if(errorCondition(index)) throw new Error('Testing an error')
       if(undefinedCondition(index)) return undefined
       await timeout(500)
-      return { index }
+      return { block: {index} }
     }
   }
 }

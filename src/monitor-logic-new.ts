@@ -75,7 +75,7 @@
 //     if (!blockInfo)
 //       return
 //
-//     const fullBlock = await client.getFullBlock(blockInfo)
+//     const fullBlock = await client.getBlockBundle(blockInfo)
 //     if (!fullBlock) {
 //       console.error('Invalid block', blockInfo)
 //       return undefined

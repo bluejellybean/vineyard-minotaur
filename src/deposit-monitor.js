@@ -96,19 +96,19 @@ class DepositMonitor {
             const blockInfo = yield this.client.getNextBlockInfo(!!lastBlock ? lastBlock.blockIndex : 0);
             if (!blockInfo)
                 return undefined;
-            const fullBlock = yield this.client.getFullBlock(blockInfo.index);
-            if (!fullBlock) {
+            const BlockBundle = yield this.client.getBlockBundle(blockInfo.index);
+            if (!BlockBundle) {
                 console.error('Invalid block', blockInfo);
                 return undefined;
             }
             const block = {
-                blockIndex: fullBlock.index,
+                blockIndex: BlockBundle.blocks.index,
                 currency: this.currency.id
             };
-            if (!fullBlock.transactions) {
+            if (!BlockBundle.transactions) {
                 return block;
             }
-            yield this.saveExternalTransactions(fullBlock.transactions, block.blockIndex);
+            yield this.saveExternalTransactions(BlockBundle.transactions, block.blockIndex);
             return this.model.setLastBlock(block);
         });
     }

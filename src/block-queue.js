@@ -46,7 +46,7 @@ class ExternalBlockQueue {
             this.blocks.push(block);
             const listeners = this.listeners;
             if (this.listeners.length > 0) {
-                const readyBlocks = this.getConsecutiveBlocks();
+                const readyBlocks = this.getConsecutiveBlocks(); // WHY is this empty...
                 if (readyBlocks.length > 0) {
                     this.listeners = [];
                     this.removeBlocks(readyBlocks);
@@ -61,10 +61,14 @@ class ExternalBlockQueue {
         }
     }
     addRequest(index) {
-        // console.log('add block', index)
         const tryRequest = () => __awaiter(this, void 0, void 0, function* () {
             try {
-                const block = yield this.client.getFullBlock(index);
+                console.log('this.client1', this.client.getBlockBundle);
+                const block = yield this.client.getBlockBundle(index);
+                console.log('block...?', block);
+                // TODO: figure out why this is so screwy. getFullBlock _DOES_ produce a block
+                // I have check the node modules, these _do_ appear to be pulling from the correct location..
+                // not sure where the heck getFullBlock is coming from.
                 yield this.onResponse(index, block);
             }
             catch (error) {
@@ -96,19 +100,21 @@ class ExternalBlockQueue {
     }
     // Ensures that batches of blocks are returned in consecutive order
     getConsecutiveBlocks() {
-        if (this.blocks.length == 0)
+        if (this.blocks.length == 0) {
             return [];
+        }
         const results = this.blocks.concat([]).sort((a, b) => a.index > b.index ? 1 : -1);
         const oldestRequest = this.requests.map(r => r.blockIndex).sort()[0];
-        const oldestResult = results[0].index;
+        const oldestResult = results[0].blocks.index;
         if (oldestRequest && oldestResult > oldestRequest) {
             return [];
         }
         const blocks = [];
         let i = oldestResult;
         for (let r of results) {
-            if (r.index != i++)
+            if (r.index != i++) {
                 break;
+            }
             blocks.push(r);
         }
         if (blocks.length < this.config.minSize && this.requests.length > 0) {
